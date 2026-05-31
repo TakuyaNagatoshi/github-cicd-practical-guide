@@ -5,10 +5,15 @@ jobs:
     if: ${{ github.actor == 'dependabot[bot]' }}
     runs-on: ubuntu-latest
     permissions:
-      content: write
+      contents: write
       pull-requests: write
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
-      - run: gh pr merge "${GITHUB_HEAD_REFF}" --merge --auto
+      - id: meta
+        uses: dependabot/fetch-metadata@v2
+      - if: ${{ steps.meta.outputs.update-type == 'version-update:semver-patch' }}
+        run: |
+          gh pr review "${GITHUB_HEAD_REFF}" --approve
+          gh pr merge "${GITHUB_HEAD_REFF}" --merge --auto
